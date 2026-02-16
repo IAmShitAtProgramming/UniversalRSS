@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 from datetime import datetime
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 
 # Konfiguracja
 URLS_FILE = 'urls.txt'
@@ -20,7 +20,7 @@ RULES = {
 }
 
 def get_selector(url):
-    for key in RULES:
+    for key in sorted(RULES.keys(), key=len, reverse=True):
         if key in url:
             return RULES[key]
     return RULES["default"]
@@ -62,11 +62,7 @@ def scrape():
                     continue
 
                 # Budowanie pełnego linku
-                if href.startswith('/'):
-                    parsed_uri = urlparse(url)
-                    href = f"{parsed_uri.scheme}://{parsed_uri.netloc}{href}"
-                elif not href.startswith('http'):
-                    href = url.rstrip('/') + '/' + href.lstrip('/')
+                href = urljoin(url, href)
 
                 all_results.append({
                     "title": title,
