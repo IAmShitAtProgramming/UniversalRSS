@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 # Konfiguracja
 URLS_FILE = 'urls.txt'
 DATA_FILE = 'data.json'
+DATA_JS_FILE = 'data.js'
 MAX_NEWS_PER_SITE = 5  # Limit, aby plik nie był zbyt ciężki
 
 # Selektory CSS dla różnych grup stron
@@ -82,6 +83,11 @@ def scrape():
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(all_results, f, ensure_ascii=False, indent=2)
     
+    # 4. Zapisz do data.js (dla index.html otwieranego lokalnie)
+    with open(DATA_JS_FILE, 'w', encoding='utf-8') as f:
+        json_str = json.dumps(all_results, ensure_ascii=False)
+        f.write(f"const newsData = {json_str};")
+
     print(f"Zakończono! Znaleziono łącznie {len(all_results)} wpisów.")
 
 if __name__ == "__main__":

@@ -28,6 +28,6 @@ jobs:
         run: |
           git config --global user.name 'NewsBot'
           git config --global user.email 'bot@github.com'
-          git add data.json
+          git add data.json data.js
           git commit -m "Automatyczna aktualizacja danych: $(date)" || exit 0
           git push

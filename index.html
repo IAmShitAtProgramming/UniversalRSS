@@ -2,33 +2,182 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Monitor Legislacji i Newsów</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregator Wiadomości</title>
     <style>
-        body { font-family: sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background: #f4f4f4; }
-        .news-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .date { color: #666; font-size: 0.8em; }
-        a { text-decoration: none; color: #0056b3; font-weight: bold; }
-        a:hover { text-decoration: underline; }
-        .source { font-size: 0.7em; color: #999; text-transform: uppercase; margin-top: 5px; }
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --accent-color: #0056b3;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .search-bar {
+            width: 100%;
+            max-width: 500px;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            outline: none;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .search-bar:focus {
+            border-color: var(--accent-color);
+        }
+
+        .stats {
+            text-align: center;
+            color: #666;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .news-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .news-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .domain-badge {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: bold;
+            align-self: flex-start;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .news-title {
+            font-size: 1.1em;
+            margin: 0 0 15px 0;
+            line-height: 1.4;
+        }
+
+        .news-title a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .news-title a:hover {
+            color: var(--accent-color);
+        }
+
+        .news-footer {
+            font-size: 0.85em;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            margin-top: auto;
+        }
     </style>
 </head>
 <body>
-    <h1>Ostatnie aktualizacje</h1>
-    <div id="content">Ładowanie danych...</div>
 
-    <script>
-        fetch('data.json')
-            .then(response => response.json())
-            .then(data => {
-                const container = document.getElementById('content');
-                container.innerHTML = data.reverse().map(item => `
-                    <div class="news-item">
-                        <div class="date">${item.timestamp}</div>
-                        <a href="${item.url}" target="_blank">${item.title}</a>
-                        <div class="source">${item.domain}</div>
-                    </div>
-                `).join('');
-            });
-    </script>
+<div class="container">
+    <header>
+        <h1>Centrum Wiadomości</h1>
+        <input type="text" id="searchInput" class="search-bar" placeholder="Szukaj w tytułach lub domenach...">
+        <div class="stats" id="stats">Ładowanie...</div>
+    </header>
+
+    <div id="newsContainer" class="news-grid"></div>
+</div>
+
+<!-- Wczytujemy dane wygenerowane przez scraper.py -->
+<script src="data.js"></script>
+<script>
+    const container = document.getElementById('newsContainer');
+    const searchInput = document.getElementById('searchInput');
+    const statsDiv = document.getElementById('stats');
+
+    // Sprawdzenie czy dane zostały załadowane
+    if (typeof newsData === 'undefined') {
+        container.innerHTML = '<p style="text-align:center; color:red;">Brak danych. Uruchom najpierw <code>scraper.py</code>!</p>';
+    } else {
+        renderNews(newsData);
+    }
+
+    function renderNews(data) {
+        container.innerHTML = '';
+        statsDiv.textContent = `Wyświetlono ${data.length} artykułów`;
+
+        data.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'news-card';
+            
+            card.innerHTML = `
+                <div class="domain-badge">${item.domain}</div>
+                <h3 class="news-title">
+                    <a href="${item.url}" target="_blank">${item.title}</a>
+                </h3>
+                <div class="news-footer">
+                    ${item.timestamp}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // Obsługa wyszukiwania
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        if (typeof newsData !== 'undefined') {
+            const filtered = newsData.filter(item => 
+                item.title.toLowerCase().includes(term) || 
+                item.domain.toLowerCase().includes(term)
+            );
+            renderNews(filtered);
+        }
+    });
+</script>
+
 </body>
 </html>
