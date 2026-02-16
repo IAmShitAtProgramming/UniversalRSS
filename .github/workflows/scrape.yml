@@ -1,0 +1,33 @@
+name: Odświeżanie Newsów
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Uruchamiaj co pełną godzinę
+  workflow_dispatch: # Pozwala uruchomić ręcznie przyciskiem
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobranie kodu repozytorium
+        uses: actions/checkout@v3
+
+      - name: Konfiguracja Pythona
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Instalacja bibliotek
+        run: |
+          pip install requests beautifulsoup4
+
+      - name: Uruchomienie skanera
+        run: python scraper.py
+
+      - name: Zapisanie zmian w data.json
+        run: |
+          git config --global user.name 'NewsBot'
+          git config --global user.email 'bot@github.com'
+          git add data.json
+          git commit -m "Automatyczna aktualizacja danych: $(date)" || exit 0
+          git push
