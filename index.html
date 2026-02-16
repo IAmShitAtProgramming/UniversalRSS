@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitor Legislacji i Newsów</title>
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background: #f4f4f4; }
+        .news-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .date { color: #666; font-size: 0.8em; }
+        a { text-decoration: none; color: #0056b3; font-weight: bold; }
+        a:hover { text-decoration: underline; }
+        .source { font-size: 0.7em; color: #999; text-transform: uppercase; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Ostatnie aktualizacje</h1>
+    <div id="content">Ładowanie danych...</div>
+
+    <script>
+        fetch('data.json')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('content');
+                container.innerHTML = data.reverse().map(item => `
+                    <div class="news-item">
+                        <div class="date">${item.timestamp}</div>
+                        <a href="${item.url}" target="_blank">${item.title}</a>
+                        <div class="source">${item.domain}</div>
+                    </div>
+                `).join('');
+            });
+    </script>
+</body>
+</html>
